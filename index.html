@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r127/three.min.js"></script>
+        <script src="OrbitControls.js"></script>
+        <script type="text/javascript" src="script.js"></script>
+        <link rel="stylesheet" href="style.css">
+        <title>skinpack editor</title>
+    </head>
+    <body>
+        <div id="header">
+            skinpack editor
+        </div>
+        <div id="lists">
+            <div class="top">
+                <p class="tops">serialize:<input type="text" class="input" value="newskinpack" id="serialize"></p>
+                <p class="tops1">localization:<input type="text" class="input" value="newskinpack" id="localization"></p>
+                <img src="pluss.png" class="add" onclick="addtab()">
+            </div>
+            <div id="container">
+                <label class="listSl" for="select1" id="list1">
+                    <input type="button" id="select1" class="none" onclick="setTab(1)">
+                    <p class="sname">name:<input type="text" class="input" value="skin name" id="sname1"></p>
+                    <p class="geoname">geometry:<select size="1" id="geo1" onchange="GeoChanged(this.value,1)">
+                                    <option>custom</option>
+                                    <option>customSlim</option>
+                                </select>
+                        </p>
+                        <p class="imgname" id="fileimg1">image:
+                            <label for="file1" class="file">
+                                <img src="file.png">
+                                <input type="file" accept=".png" class="input" id="file1" onchange="selectFile(
+                                    this.files[0].name,
+                                    window.URL.createObjectURL(this.files[0]),
+                                    1,this.files[0]
+                                )">
+                            <label>
+                        </p>
+                        <p class="delete">
+                            <label for="del1" class="deleteic">
+                                <img src="del.png">
+                                <input type="button" class="input" id="del1" onclick="deleteTab(1)">
+                            <label>
+                        </p>
+                </label>
+            </div>
+            <div id="gen">
+                <div class="bottomst">
+                    <p class="text">generate mcpack:</p>
+                    <input type="checkbox" id="ismcpackbox"><label for="ismcpackbox" id="ismcpack"></label>
+                </div>
+                <div class="bottomst2"> 
+                    <input type="button" id="generate"><label for="generate" class="bottombtn" onclick="generate()">
+                        <p id="textf">
+                            generate!
+                        </p>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div id="canvas">
+            <img id="tt">
+        </div>
+        <div id="bottom">
+
+        </div>
+
+    </body>
+</html>
