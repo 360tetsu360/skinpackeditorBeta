@@ -507,20 +507,18 @@ function manifest(){
     var Newuuid = uuid()
     var Newuuid2 = uuid()
     var manifest = {
-        format_version: 2,
-        header: {
-            description: "twitter @360tetsu360",
-            name: "ScaleResorcepack",
-            uuid: Newuuid,
-            version: [0, 0, 1],
-            min_engine_version: [ 1, 14, 0 ]
+        "format_version": 1,
+        "header": {
+            "name": "Skin Pack",
+            "uuid": Newuuid,
+            "version": [0, 0, 1],
+            "min_engine_version": [1, 2, 6]
         },
-        modules: [
+        "modules": [
             {
-                description: "ScaleResorcepack",
-                type: "resources",
-                uuid: Newuuid2,
-                version: [0, 0, 1]
+                "type": "skin_pack",
+                "uuid": Newuuid2,
+                "version": [0, 0, 1]
             }
         ]
     }
