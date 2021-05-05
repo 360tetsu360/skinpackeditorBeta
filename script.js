@@ -2,6 +2,7 @@ var tab = 2;
 var slectedTab = 1;
 var skins = {};
 var geometrys = {};
+var geometrysjson = {};
 var textureSizes = {};
 var scene;
 var group;
@@ -12,6 +13,14 @@ var customSize = {
 var customSlimSize = {
     x:64,
     y:64,
+}
+function ImageToBase64(img, mime_type) {
+    var canvas = document.createElement('canvas');
+    canvas.width  = img.width;
+    canvas.height = img.height;
+    var ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    return canvas.toDataURL(mime_type);
 }
 onload = ()=>{
     var width = 0;
@@ -50,7 +59,10 @@ onload = ()=>{
     }
 
     geometrys["custom"] = custom;
+    geometrysjson["custom"] = {data:null,added:true};
     geometrys["customSlim"] = customSlim;
+    geometrysjson["customSlim"] = {data:null,added:true};
+
     var a = document.getElementById("geo1")
     skins[`${1}`] = new Skin("skin name","custom","","",null,a,1);
     textureSizes["custom"] = customSize;
@@ -186,6 +198,14 @@ function deleteTab(i){
     target.remove(); 
 }
 function selectFile(filename,url,id,file){
+    var tar = new Image();
+    tar.onload = function(e){
+        var width = tar.width;
+        var height = tar.height;
+        skins[`${id}`].img = ImageToBase64(tar,"image/png");
+    }
+    tar.src = url;
+
     var target = document.getElementById(`fileimg${id}`);
     target.textContent = "image:" + filename;
     const label1 = document.createElement("label");
@@ -207,7 +227,6 @@ function selectFile(filename,url,id,file){
     target.appendChild(label1);
     skins[`${id}`].Filename = filename;
     skins[`${id}`].url = url;
-    
     //var target2 = document.getElementById(`tt`);
     //target2.src = url;
 }
@@ -239,6 +258,10 @@ var skinjson = {
   }
   
 function generate(){
+    var Newmanifest = manifest();
+    var zip = new JSZip();
+    zip.folder("skinpack").file("manifest.json", `${Newmanifest}`);
+    var n = 0;
     for (const key in skins) {
         if (Object.hasOwnProperty.call(skins, key)) {
             const element = skins[key];
@@ -250,17 +273,52 @@ function generate(){
                     "type": "free"
                 }
             )
+            if(!geometrysjson[element.geometry].added)
+            {
+                //zip.file(`geo${n}.json`, `${JSON.stringify(geometrysjson[element.geometry].data,null,"  ")}`);
+                geojson["minecraft:geometry"].push(geometrysjson[element.geometry].data);
+                geometrysjson[element.geometry].added = true;
+                n++;
+            }
+
+            console.log(element.img);
+            var imgData = element.img.replace(/^data:image\/(png|jpg);base64,/, "");
+            imgData = atob(imgData);
+            zip.file(element.Filename, imgData, {binary: true});
+            /*var imm = document.createElement("img");
+            imm.src = element.url;
+            //var imgData = ImageToBase64(imm,"image/png");
+            var canvas = document.createElement('canvas');
+            canvas.width  = imm.width;
+            canvas.height = imm.height;
+            var ctx = canvas.getContext('2d');
+            ctx.drawImage(imm, 0, 0);
+            var g = canvas.toDataURL(mime_type);
+            console.log(g);
+            //console.log(element.url);
+            //imgData = imgData.substr(22);
+            //imgData = atob(imgData);
+            //console.log(imgData);
+            //zip.file(element.Filename, imgData, {binary: true});*/
         }
     }
     var target = document.getElementById("serialize");
     var target2 = document.getElementById("localization");
     skinjson.serialize_name = target.value;
     skinjson.localization_name = target2.value;
-    let blob = new Blob([JSON.stringify(skinjson,null,"  ")],{type:"text/plan"});
+    zip.file("geometry.json", `${JSON.stringify(geojson,null,"  ")}`);
+    zip.file("skins.json", `${JSON.stringify(skinjson,null,"  ")}`);
+    //zip.folder("test").folder("a").file("Hello.txt", "Hello World\n");
+    zip.generateAsync({type:"blob"})
+    .then(function(content) {
+        saveAs(content, "skin.zip");
+    });
+
+    /*let blob = new Blob([JSON.stringify(skinjson,null,"  ")],{type:"text/plan"});
     let link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download =  'skins.json';
-    link.click();
+    link.click();**/
 }
 function loadNewGeo(filename,url,id,file){
     alert(filename);
@@ -277,6 +335,7 @@ function loadNewGeo(filename,url,id,file){
                     option3.textContent = data["minecraft:geometry"][0]["description"]["identifier"];
                     target.after(option3);
                     geometrys[data["minecraft:geometry"][0]["description"]["identifier"]] = data["minecraft:geometry"][0].bones;
+                    geometrysjson[data["minecraft:geometry"][0]["description"]["identifier"]] = {data:data["minecraft:geometry"][0],added:false};
                 }
             }
             var target2 = document.getElementById(`geo${id}`);
@@ -287,7 +346,7 @@ function loadNewGeo(filename,url,id,file){
                 y:data["minecraft:geometry"][0]["description"]["texture_height"]
             }
         }
-        else if(Object.keys(data)[1].match(/geometry/)){
+        /*else if(Object.keys(data)[1].match(/geometry/)){
             for (const key in skins) {
                 if (Object.hasOwnProperty.call(skins, key)) {
                     const element = skins[key];
@@ -297,6 +356,7 @@ function loadNewGeo(filename,url,id,file){
                     option3.textContent = Object.keys(data)[1];
                     target.after(option3);
                     geometrys[Object.keys(data)[1]] = Object.values(data)[1].bones;
+                    geometrysjson[Object.keys(data)[1]] = {data:data,added:false};
                 }
             }
             var target2 = document.getElementById(`geo${id}`);
@@ -306,7 +366,7 @@ function loadNewGeo(filename,url,id,file){
                 x:Object.keys(data)[1]["texturewidth"],
                 y:Object.keys(data)[1]["textureheight"]
             }
-        }
+        }*/
         else{
             alert("cannot read file.")
         }
@@ -332,7 +392,18 @@ function loadGeo(bones,textureSize){
     }
 }
 function box(origin,offset,uv,textureSize){
-    
+    /*var color = Math.round(Math.random() * 101 + 155) * 0x10000 + Math.round(Math.random() * 101 + 155) * 0x100 + Math.round(Math.random() * 101 + 155) * 0x1
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(
+        offset.x,offset.y,offset.z), new THREE.MeshLambertMaterial({color: color}));
+    mesh.position.x = origin.x + offset.x / 2;
+    mesh.position.y = origin.y + offset.y / 2,
+    mesh.position.z = origin.z + offset.z / 2
+    group.add(mesh);*/
+    //console.log("a");
+
+
+
+
     let geom = new THREE.BoxGeometry(offset.x, offset.y, offset.z);
 
     geom.faces.forEach( face => { face.materialIndex = 0 });
@@ -420,4 +491,40 @@ function box(origin,offset,uv,textureSize){
     box.position.z = origin.z + offset.z / 2;
 
     group.add(box);
+}
+function uuid(){
+    var uuid = "", i, random;
+    for (i = 0; i < 32; i++) {
+        random = Math.random() * 16 | 0;
+        if (i == 8 || i == 12 || i == 16 || i == 20) {
+            uuid += "-"
+        }
+    uuid += (i == 12 ? 4 : (i == 16 ? (random & 3 | 8) : random)).toString(16);
+    }
+return uuid;
+}
+function manifest(){
+    var Newuuid = uuid()
+    var Newuuid2 = uuid()
+    var manifest = {
+        format_version: 2,
+        header: {
+            description: "twitter @360tetsu360",
+            name: "ScaleResorcepack",
+            uuid: Newuuid,
+            version: [0, 0, 1],
+            min_engine_version: [ 1, 14, 0 ]
+        },
+        modules: [
+            {
+                description: "ScaleResorcepack",
+                type: "resources",
+                uuid: Newuuid2,
+                version: [0, 0, 1]
+            }
+        ]
+    }
+    var final = JSON.stringify(manifest, null, "\t")
+    return final
+
 }
