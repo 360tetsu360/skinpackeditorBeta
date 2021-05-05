@@ -275,8 +275,8 @@ function generate(){
             )
             if(!geometrysjson[element.geometry].added)
             {
-                //zip.file(`geo${n}.json`, `${JSON.stringify(geometrysjson[element.geometry].data,null,"  ")}`);
-                geojson["minecraft:geometry"].push(geometrysjson[element.geometry].data);
+                zip.file(`geo${n}.json`, `${JSON.stringify(geometrysjson[element.geometry].data,null,"  ")}`);
+                //geojson["minecraft:geometry"].push(geometrysjson[element.geometry].data);
                 geometrysjson[element.geometry].added = true;
                 n++;
             }
@@ -335,7 +335,7 @@ function loadNewGeo(filename,url,id,file){
                     option3.textContent = data["minecraft:geometry"][0]["description"]["identifier"];
                     target.after(option3);
                     geometrys[data["minecraft:geometry"][0]["description"]["identifier"]] = data["minecraft:geometry"][0].bones;
-                    geometrysjson[data["minecraft:geometry"][0]["description"]["identifier"]] = {data:data["minecraft:geometry"][0],added:false};
+                    geometrysjson[data["minecraft:geometry"][0]["description"]["identifier"]] = {data:data,added:false};
                 }
             }
             var target2 = document.getElementById(`geo${id}`);
@@ -346,7 +346,7 @@ function loadNewGeo(filename,url,id,file){
                 y:data["minecraft:geometry"][0]["description"]["texture_height"]
             }
         }
-        /*else if(Object.keys(data)[1].match(/geometry/)){
+        else if(Object.keys(data)[1].match(/geometry/)){
             for (const key in skins) {
                 if (Object.hasOwnProperty.call(skins, key)) {
                     const element = skins[key];
@@ -366,7 +366,7 @@ function loadNewGeo(filename,url,id,file){
                 x:Object.keys(data)[1]["texturewidth"],
                 y:Object.keys(data)[1]["textureheight"]
             }
-        }*/
+        }
         else{
             alert("cannot read file.")
         }
